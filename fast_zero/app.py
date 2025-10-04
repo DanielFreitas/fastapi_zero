@@ -1,7 +1,6 @@
 from http import HTTPStatus
-from http.client import HTTPException
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
 from fast_zero.schemas import MessageSchema, UserDB, UserListSchema, UserPublicSchema, UserSchema
@@ -42,6 +41,14 @@ def create_user(user: UserSchema):
 @app.get('/users/', status_code=HTTPStatus.OK, response_model=UserListSchema)
 def read_users():
     return {'users': database}
+
+
+@app.get('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublicSchema)
+def read_user(user_id: int):
+    if user_id < 1 or user_id > len(database):
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='User not found')
+
+    return database[user_id - 1]
 
 
 @app.put('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublicSchema)
